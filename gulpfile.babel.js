@@ -10,12 +10,15 @@ import webpackConfig from "./webpack.conf";
 import svgstore from "gulp-svgstore";
 import svgmin from "gulp-svgmin";
 import inject from "gulp-inject";
-import replace from "gulp-replace";
 import cssnano from "cssnano";
 
 const browserSync = BrowserSync.create();
 const hugoBin = `./bin/hugo.${process.platform === "win32" ? "exe" : process.platform}`;
 const defaultArgs = ["-d", "../dist", "-s", "site"];
+
+if (process.env.DEBUG) {
+  defaultArgs.unshift("--debug")
+}
 
 gulp.task("hugo", (cb) => buildSite(cb));
 gulp.task("hugo-preview", (cb) => buildSite(cb, ["--buildDrafts", "--buildFuture"]));
@@ -54,7 +57,7 @@ gulp.task("js", (cb) => {
 
 gulp.task("svg", () => {
   const svgs = gulp
-    .src("site/static/img/icons/*.svg")
+    .src("site/static/img/icons-*.svg")
     .pipe(svgmin())
     .pipe(svgstore({inlineSvg: true}));
 
@@ -76,7 +79,7 @@ gulp.task("server", ["hugo", "css", "cms-assets", "js", "svg"], () => {
   });
   gulp.watch("./src/js/**/*.js", ["js"]);
   gulp.watch("./src/css/**/*.css", ["css"]);
-  gulp.watch("./site/static/img/icons/*.svg", ["svg"]);
+  gulp.watch("./site/static/img/icons-*.svg", ["svg"]);
   gulp.watch("./site/**/*", ["hugo"]);
 });
 
